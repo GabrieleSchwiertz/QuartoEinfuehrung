@@ -1,0 +1,479 @@
+---
+title: "Ein Paper mit Quarto"
+author: "Dr. Gabriele Schwiertz"
+institute: "Universitäts- und Stadtbibliothek Köln"
+lang: de
+date: today
+date-format: iso
+bibliography: references.bib
+format:
+  html:
+    code-link: true
+    toc: true
+---
+
+# Skript zu: Reproduzierbares Paper mit Quarto
+
+## RStudio
+
+Ich arbeite in RStudio, wir legen ein neues Quarto-Dokument an (File\>New File\>Quarto Document). Auf der linken Seite haben wir das Markdown-Dokument, rechts den Output.
+
+Mit dem Render-Button (oder `Ctrl + Shift + K`) geben wir das Dokument aus, lassen die letzten Änderungen einbauen. Ich setze meistens ein Häkchen bei "Render on Save" dann wird bei jedem Speichern (`Crtl + S`) auch der Output nochmal generiert.
+
+## Dokumentstruktur
+
+Wir haben die Metadaten und zusätzliche Einstellungen im YAML-Header, haben unsere Prosa als Markdown und Code-Chunks, die ausgeführt werden können.
+
+## YAML
+
+Yet Another Markup Language
+
+``` {{yaml}}
+key: value
+```
+
+Whitespace (Leerzeichen und Einrückung) ist wichtig!
+
+### Output festlegen
+
+Im YAML-Header werden die Output-Options festgelegt. Wir arbeiten hier mit html als Default, man kann das aber leicht ändern zu pdf oder Folien (revealjs):
+
+``` {{yaml}}
+---
+format: html
+---
+
+---
+format: pdf
+---
+
+---
+format: revealjs
+---
+```
+
+### Sub-Options
+
+Zu vielen Befehlen gibt es weitere Optionen (Sub-Options), die werden eingerückt darunter aufgeführt. Z.B. können wir ein Inhaltsverzeichnis hinzufügen:
+
+``` {{yaml}}
+format:
+  pdf:
+    toc: true
+```
+
+## Rendern: Single Source Publishing
+
+Wir können also aus unserem Dokument ein html generieren lassen, ein pdf oder Folien. Ausprobieren: Wir fügen ein Inhaltsverzeichnis hinzu, dann wieder zurück nach hmtl. Das lässt sich hier so einfach umsetzen, weil das Dokument so einfach strukturiert ist. Allerdings sind die verschiedenen Outputs auch bei komplexeren Dokumenten besser miteinander integriert als bei anderen Set-ups.
+
+## Weitere YAML-Felder
+
+```{{yaml}}
+
+institute: "Universitäts- und Stadtbibliothek Köln"
+lang: de
+date: today
+
+```
+
+
+
+# Authoring
+
+Ich zeige Funktionen, die beim Schreiben wissenschaftlicher Artikel wichtig und nützlich sind.
+
+## Text strukturieren
+
+Überschriften, Inhaltsverzeichnis haben wir schon gesehen und sind in md einfacher als in $\LaTeX$. In RStudio kann ich die Dokumentstruktur (unter Outline) einblenden lassen und da zu den Kapitel navigieren. 
+
+## Aufzählungen 
+
+Aufzählungen sind einfach: 
+
+- erstens
+- zweitens 
+- drittens 
+
+
+## Fussnoten
+
+Natürlich kann man auch Fussnoten machen[^1]. Die Fußnoten stehen im pdf unten auf der Seite, in html-Dokumenten erscheinen sie als Endnotes[^2].
+
+[^1]: Meine erste Fußnote.
+
+[^2]: Meine zweite Fußnote.
+
+
+## Code Chunks
+
+Ich kann in Quarto-Dokumenten (wie auch schon in Rmarkdown) R-Code und dessen Output einbinden und so auch direkt auf die Daten zugreifen. Code-Chunks kann man mit `Ctrl + Shift + i` einfügen oder über den Visual Editor.
+
+
+Zunächst laden wir mal Pakete. weil es da immer viel Output gibt, den wir so nicht brauchen, ändern wir etwas an den Chunk-Options. Die werden -- anders als in RMarkdown -- mit der Hashpipe-Syntax eingefügt. Vorteil: Ähnliche Syntax wie im YAML-header, konsistente Syntax für verschiedene Engines und längere Bildunterschriften, bzw. Alternativtext ist besser lesbar.
+
+```{r}
+#| echo: false
+#| warning: false
+
+library(palmerpenguins)
+library(tidyverse)
+library(ggplot2)
+
+
+```
+
+## Inline-Code
+
+Wir arbeiten hier mit dem Paket `palmerpenguins` mit dem `penguins`-Datensatz.
+
+Man kann Code im Text verwenden, z.B.:
+
+-   Mit `r nrow(penguins)` Pinguinen
+
+-   `r n_distinct(penguins$species)` Pinguinarten (Adélie, Chinstrap, und Gentoo)
+
+## Plots
+
+Und natürlich kann ich schöne Plots direkt generieren:
+
+```{r}
+#| echo: true
+#| label: fig-pinguine
+#| warning: false
+#| cache: true
+
+
+ggplot(data = penguins, 
+                       aes(x = flipper_length_mm,
+                           y = body_mass_g)) +
+  geom_point(aes(color = species, 
+                 shape = species),
+             size = 3,
+             alpha = 0.8) +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  labs(title = "Penguin size, Palmer Station LTER",
+       subtitle = "Flipper length and body mass for Adelie, Chinstrap and Gentoo Penguins",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  theme(legend.position = c(0.2, 0.7),
+        plot.title.position = "plot",
+        plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.caption.position = "plot")
+```
+
+## Tabellen
+
+Ich kann verschiedene Arten von Tabellen oder Zusammenfassungen direkt aus den Daten generieren lassen und einbinden.
+
+```{r}
+head(penguins)
+```
+
+Oder
+
+```{r}
+glimpse(penguins)
+```
+
+Oder eine Zusammenfassung des Datensatzes
+
+```{r}
+summary(penguins)
+```
+
+Oder etwas schöner mit `kable`:
+
+```{r}
+#| label: tab-penguins
+#| tbl-cap: "Pinguine"
+#| tbl-colwidths: [60,40]
+
+library(knitr)
+kable(head(penguins))
+```
+
+## Schönere Tabellen mit `gt + gtExtras`
+
+Beispiel von https://rstudio-conf-2022.github.io/get-started-quarto/materials/07-plots-tables.html#/tables
+
+```{r}
+#| echo: false
+#| warning: false
+library(gt)
+library(gtExtras)
+library(gtsummary)
+
+penguins <- palmerpenguins::penguins
+
+penguin_sum <- penguins |>
+  na.omit() |>
+  group_by(species, sex) |>
+  summarise(
+    n = n(),
+    bill_len = mean(bill_length_mm),
+    plt_bill = list(bill_length_mm),
+    mass = mean(body_mass_g),
+    plt_mass = list(body_mass_g),
+    .groups = "drop"
+  ) |> 
+  arrange(species, desc(bill_len))
+
+penguin_sum
+```
+
+```{r}
+
+#| echo: false
+#| warning: false
+
+gt(penguin_sum) |>
+  gt_plt_dist(
+    plt_bill, 
+    line_color = "#447099", 
+    fill = "#75aadb",
+    fig_dim = c(15, 50)
+    ) |> 
+  gt_plt_dist(
+    plt_mass, 
+    line_color = "#447099", 
+    fill = "#75aadb"
+    ) |> 
+  gt_add_divider(
+    c(bill_len, mass), "left", 
+    weight = px(1), color = "#d3d3d3"
+    ) |> 
+  cols_align("left", species) |> 
+  text_transform(
+    cells_body(sex),
+    fn = function(x){
+      sex_planet <- ifelse(x == "male", "mars", "venus")
+      
+      purrr::map(
+        sex_planet, 
+        ~fontawesome::fa(
+          .x, height = "45px",
+          fill = ifelse(.x =="mars", "#7fbf7b", "#af8dc3")))
+                 }) |>
+  gt_theme_nytimes() |>
+  tab_options(data_row.padding = px(2),
+              table.font.size = px(40),
+              column_labels.font.size = px(35))
+```
+
+
+
+# Visual Editor
+
+Wir probieren den Visual Editor aus. Hier habe ich verschiedene Buttons und Menus, die mehr an die Handhabung von Word erinnern. Auch gut, wenn man mal wieder vergessen hat, wie Hyperlinks eingebunden werden o.ä..
+
+## Bild einfügen
+
+Im Visual Editor ist es einfach ein Bild einzubinden, einfach über den Button ein lokal abgelegtes oder im Web verfügbares Bild einfügen. Hier habe ich dann auch Tools, die Größe durch Ziehen mit der Maus zu verändern, viel leichter als vorher. Auch Alt-Text ist einfach. Und `fig-cap` nicht vergessen.
+
+![Meine Bildunterschrift](img/allison-penguins.png){#fig-penguins fig-alt="Alternativer Text für die Barrierefreiheit"}
+
+## Referenzen einfügen
+
+Im Visual Editor kann man über den "Insert"-Button alles mögliche einfügen, z.B. \`citation\` oder im Source-Editor mit '\@'. Im YAML-Header fügen wir `bibliography: references.bib` hinzu.
+
+[@buss2018]
+
+@wilson
+
+Oder via DOI, z.B. 10.5281/zenodo.824016
+
+und @friesen2017
+
+Das Literaturverzeichnis wird automatisch am Ende des Dokuments eingefügt und in der Datei references.bib werden alle neuen Referenzen automatisch abgelegt .
+
+Zitationsstile können im Header festgeleg werden, hier kann man eine Stil-Datei in [CSL](https://citationstyles.org/ "Citation Style Language") einbinden, hat also Zugriff auf sehr viele Stile: 8,500 Creative Commons CSL Stile im [central repository](https://github.com/citation-style-language/styles) oder Zoteros [style repository](https://www.zotero.org/styles).
+
+## Querverweise
+
+Ich kann Querverweise mit dem insert-Tool im Visual-Editor oder mit \`\@fig-pinguine\` eingefügt werden, vlg. @fig-pinguine .
+
+Dazu braucht es natürlich ein Label (ID) am eingefügten Bild: `{#fig-pinguine}`.
+
+## $\LaTeX$
+
+Um Formeln schön setzen zu können, kann man $\LaTeX$- Syntax verwenden:
+
+$$
+F(x) = \int^a_b \frac{1}{3}x^3
+$$
+
+
+## Wenn es zu langsam wird
+
+In den Code-Chunk-Options -- oder auch im Dokument-Header -- kann man einstellen, dass Zellen nicht immer wieder ausgeführt werden.
+
+``` {{yaml}}
+#| cache: true
+
+Oder
+
+#| freeze: true
+```
+
+Für Projekte (Bücher, Blogs, Webseiten, ...) kann man mit der Option `freeze: true` arbeiten.
+
+
+
+## Journal Templates
+Für (einige Journals)[https://quarto.org/docs/extensions/listing-journals.html] gibt es Templates, mit denen man Artikel schreiben und einreichen kann. 
+
+Unser Beispiel hier ist das (PLOS-Template)[https://github.com/quarto-journals/plos]. 
+ 
+
+# Unterrichten
+
+Quarto erlaubt es durch den Single-Source-Publishing-Ansatz, einfach eigene Analyse-Skripte zu Unterrichtsmaterialien (Folien, Blogs,...) zu überführen. Zusätzlich gibt es einige nützliche Features zum Unterrichten.
+
+## Call-out-Blocks
+
+Man kann durch Call-Out-Blocks eine konsistente Formatierung zwischen Folien, Skripten und pdf's erreichen (s. [fenced divs] (https://quarto.org/docs/authoring/markdown-basics.html#divs-and-spans)).
+
+
+::: callout-note
+Es gibt verschiedene Typen, 'note', 'tip', 'warning', 'caution' und 'important.
+:::
+
+::: callout-tip
+Es gibt verschiedene Typen, 'note', 'tip', 'warning', 'caution' und 'important.
+:::
+
+::: callout-warning
+Es gibt verschiedene Typen, 'note', 'tip', 'warning', 'caution' und 'important.
+:::
+
+::: {.callout-caution collaps="true"}
+Es gibt verschiedene Typen, 'note', 'tip', 'warning', 'caution' und 'important.
+:::
+
+::: callout-important
+Es gibt verschiedene Typen, 'note', 'tip', 'warning', 'caution' und 'important.
+:::
+
+## Code-highlighting, folding und Tools
+
+Ein Copy-Button für die Code-Zellen wird per default in der rechten Ecke angezeigt. Mit der YAML-Option `code-link` kann man einzelne Befehle auf die Hilfeseiten automatisch verlinken. Mit `code-fold: true` lässt sich der Code wegklappen und auf Knopfdruck wieder aufklappen und mit `code-tools: true` gibt es einen Button, der für das ganze Dokument den Code aus- oder einklappt und den Quellcode anzeigen kann.
+
+``` {{yaml}
+format:
+  html:
+    code-link: true
+    code-fold: true
+    code-tools: true
+```
+
+Zum Beispiel lassen sich `head` und `summary` anklicken:
+
+```{r}
+head(penguins)
+
+summary (penguins)
+```
+
+## Tabsets
+
+In html-Dokumenten und auf Folien kann man mit Tabsets arbeiten.
+
+Z.B. Code versus Output:
+
+::: panel-tabset
+## Code
+
+```{r}
+#| eval: false
+head(penguins)
+```
+
+## Output
+
+```{r}
+#| eval: true
+#| echo: false
+head(penguins)
+```
+:::
+
+Oder Plot vs. Summary vs. Tabelle
+
+::: panel-tabset
+## Plot
+
+```{r}
+#| echo: false
+#| warning: false
+#| cache: true
+#| caption: "Plot über Pinguine,  Quelle:  https://github.com/rstudio-conf-2022/get-started-quarto/blob/main/materials/07-plots-tables.qmd"
+
+
+
+ggplot(data = penguins, 
+                       aes(x = flipper_length_mm,
+                           y = body_mass_g)) +
+  geom_point(aes(color = species, 
+                 shape = species),
+             size = 3,
+             alpha = 0.8) +
+  scale_color_manual(values = c("darkorange","purple","cyan4")) +
+  labs(title = "Penguin size, Palmer Station LTER",
+       subtitle = "Flipper length and body mass for Adelie, Chinstrap and Gentoo Penguins",
+       x = "Flipper length (mm)",
+       y = "Body mass (g)",
+       color = "Penguin species",
+       shape = "Penguin species") +
+  theme(legend.position = c(0.2, 0.7),
+        plot.title.position = "plot",
+        plot.caption = element_text(hjust = 0, face= "italic"),
+        plot.caption.position = "plot")
+```
+
+## Summary
+
+```{r}
+#| echo: false
+
+summary(penguins)
+```
+
+## Tabelle
+
+```{r}
+#| eval: true
+#| echo: false
+
+head(penguins)
+```
+:::
+
+
+
+
+## Visual Editor, die zweite
+
+Der Visual Editor macht den Einstieg für komplette Neulinge einfacher. Ich kann mit einem Dokument mit wenig Code für Plots o.ä. starten, die Studis können es minimal bearbeiten, einfach mal rendern und haben direkt ein Erfolgserlebnis. Von da kann man dann aufbauen. Auch gut, um den Code zu generieren und dann im Source-View anzuschauen.
+
+# Tools für die Zusammenarbeit
+
+## Kollaborieren
+
+-   In RStudio ist die Integration mit git einfach möglich, man könnte also via GitHub, GitLab,... zusammenarbeiten.
+
+-   Oder Posit-Cloud nutzen, das kostet zwar, aber man hat da dann ein Interface, in dem man zeitgleich arbeiten kann (vgl. Overleaf, GoogleDocs).
+
+## Kommentieren
+
+-   Ist im Text mit html-Kommentaren möglich `<!--# Mein Kommentar-->`, wird auch gehighlightet, kann auch für Notes-to-Self benutzt werden.
+
+-   Oder mithilfe von <https://web.hypothes.is/> <!--# Kommentieren ausprobieren -->
+
+-   Mehr dazu [hier](https://quarto.org/docs/output-formats/html-basics.html#commenting "Kommentieren in Quarto").
+
+
+# Weitere Features
+Projekte (z.B. für Bücher), Blogs, Reports, ... und vieles mehr auf der (Quarto-Webseite)[https://quarto.org/].
+

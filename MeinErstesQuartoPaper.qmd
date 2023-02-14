@@ -1,0 +1,36 @@
+---
+title: "Mein Erstes Paper"
+author: "Mein Name"
+format: html
+---
+
+## Quarto
+
+In Quarto können wir unsere erklärende Prosa mit dem Code und dessen Output verbinden. Weitere Informationen über Quarto findet sich auf der [Quarto-Webseite](https://quarto.org).
+
+
+## Code-Blocks
+
+In Code-Block kann man Code ausführen. Durch klicken auf den Render-Button, wird das ganze Dokument in dem ausgewählten Format ausgegeben.
+
+```{r}
+2+2
+```
+
+## Code-Chunk-Options
+
+```{r}
+#| warning: false
+#| echo: false
+
+library (palmerpenguins)
+#summary(penguins)
+plot(penguins$bill_length_mm, penguins$bill_depth_mm, col = rainbow(3)[penguins$species])
+
+```
+
+## Bilder
+
+Da wir zum Ausprobieren das Paket `palmerpenguins` verwenden werden, gibt es hier erstmal ein Bild von den Pinguinen ([Artwork by \@allison_horst](https://twitter.com/allison_horst)).
+
+[![Hier geht es um Palmer-Pinguine: Chinstrap, Gentoo und Adélie.](img/allison-penguins.png){#fig:pinguine fig-alt="Zeichnung: Palmer Pinguine" width="360"}](https://allisonhorst.com/)
